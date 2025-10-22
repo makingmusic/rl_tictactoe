@@ -1,30 +1,21 @@
+########################################################
+# import necessary modules
+# ########################################################
+import time as t
 from t3 import TicTacToe
 from display import GameDisplay
-import time as t
+from moves import TicTacToeMoves
 
 ########################################################
 # Initialize the game and display system
 ########################################################
 game = TicTacToe()
-
-display = GameDisplay(clear_screen=True, delay=0.1)  # 1 second delay between moves
-display.display_board(game, "Game Started - Empty Board")
+display = GameDisplay(clear_screen=True, delay=0.1)  # 0.1 second delay between moves
 
 ########################################################
 # Make moves and display each step
 ########################################################
-moves = [
-    (0, 1, "Player X moves to (0,0)"),
-    (0, 2, "Player X moves to (0,2)"),
-    (1, 0, "Player O moves to (1,0)"),
-    (1, 1, "Player X moves to (1,1)"),
-    (1, 2, "Player O moves to (1,2)"),
-    (2, 0, "Player X moves to (2,0)"),
-    (2, 1, "Player O moves to (2,1)"),
-    (2, 2, "Player X moves to (2,2)"),
-    (0, 0, "Player O moves to (0,0)"),
-]
-
+moves = TicTacToeMoves().generate_random_moves(max_moves=9)
 
 move_count = 0
 for row, col, move_info in moves:
@@ -32,17 +23,14 @@ for row, col, move_info in moves:
         game.make_move(row, col)
         move_count += 1
 
-        # Determine game state info
-        game_info = None
         if game.is_game_over:
-            if game.winner == "X":
-                game_info = "🎉 X Wins!"
-            elif game.winner == "O":
-                game_info = "🎉 O Wins!"
-            elif game.winner == "NOBODY WON":
-                game_info = "🤝 It's a Draw!"
+            game_winner = game.winner
+        else:
+            game_winner = "Nobody"
 
-        display.display_board(game, move_info, game_info)
+        display.display_board(
+            game, move_info, f"The winner is: {game_winner}", clear_screen=True
+        )
     else:
         print("Game is over. Stopping. The winner is: ", game.winner)
         break
