@@ -89,10 +89,14 @@ class GameDisplay:
 
         self.first_display = False
 
-    def display_game_summary(self, game, total_moves: int):
+    def display_game_summary(self, game, total_moves: int = None):
         # Game results:
         winner_string = (
             "X" if game.winner == "X" else "O" if game.winner == "O" else "NOBODY"
         )
+        # identify the value of total_moves from the game object itself.
+        if total_moves is None:
+            total_moves = game.move_count
+
         print(f"\n {winner_string} wins in {total_moves} moves.")
         print("\n" + "=" * 30)

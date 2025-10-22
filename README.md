@@ -1,6 +1,7 @@
 # rl_tictactoe
 Learning to train a tic-tac-toe model through gameplay with clean visualization.
 
+
 ## Files Overview
 
 ### Core Game Environment
@@ -13,5 +14,6 @@ Learning to train a tic-tac-toe model through gameplay with clean visualization.
 ### Quick Start
 ```bash
 uv sync
-uv run main.py 
+uv run main.py # for the computer to play random moves as both X and O
+uv run playHuman.py # computer is random, user is other player
 ```

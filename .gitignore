@@ -29,7 +29,10 @@ env/
 ENV/
 
 # Logs
-logs
+logs/
+
+# ai-tools
+.claude/
 
 # IDE
 .idea/

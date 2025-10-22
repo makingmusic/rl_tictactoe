@@ -34,6 +34,8 @@ class TicTacToe:
         self.is_game_over = False
         # open positions:
         self.open_positions = [i for i in range(size * size)]
+        # move count:
+        self.move_count = 0
 
     # print the board to the console:
     def print_board(self):
@@ -62,6 +64,8 @@ class TicTacToe:
         self.winner = self.check_win()
         # update self.is_game_over
         self.is_game_over = self.winner is not None
+        # update move count
+        self.move_count += 1
         return self.winner
 
     def check_win(self):

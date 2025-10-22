@@ -105,3 +105,14 @@ class TicTacToeMoves:
                 break
 
         return moves
+
+    def generate_random_move(self, game: TicTacToe):
+        """
+        Generate a random move for the game.
+        Returns a tuple (row, col) representing the move.
+        """
+        # Convert linear position to row, col coordinates
+        linear_pos = random.choice(game.open_positions)
+        row = linear_pos // game.size
+        col = linear_pos % game.size
+        return (row, col)
