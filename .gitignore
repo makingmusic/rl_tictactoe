@@ -37,6 +37,9 @@ logs
 *.swp
 *.swo
 
+# Python version manager files
+.python-version
+
 # OS
 .DS_Store
 .DS_Store?
