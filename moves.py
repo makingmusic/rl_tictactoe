@@ -12,7 +12,7 @@ class TicTacToeMoves:
 
     def movesForXWin(self):
         """
-        Generate a predefined set of moves that results in X winning.
+        Generate a predefined set of moves for a full game play that results in X winning.
         Returns a list of tuples in format (row, col, description).
         """
         return [
@@ -39,7 +39,7 @@ class TicTacToeMoves:
 
     def movesForDraw(self):
         """
-        Generate a predefined set of moves that results in a draw.
+        Generate a predefined set of moves for a full game play that results in a draw.
         Returns a list of tuples in format (row, col, description).
         """
         return [
@@ -56,7 +56,7 @@ class TicTacToeMoves:
 
     def generate_random_moves(self, max_moves=9):
         """
-        Generate random legal moves for testing.
+        Generate full game play through with random legal moves for testing.
 
         Args:
             max_moves (int): Maximum number of moves to generate (default: 9 for full board)
@@ -108,7 +108,7 @@ class TicTacToeMoves:
 
     def generate_random_move(self, game: TicTacToe):
         """
-        Generate a random move for the game.
+        Generate a random move for the game given the game object.
         Returns a tuple (row, col) representing the move.
         """
         # Convert linear position to row, col coordinates

@@ -1,5 +1,5 @@
 ########################################################
-# import necessary modules
+# import modules
 # ########################################################
 import time as t
 from t3 import TicTacToe
