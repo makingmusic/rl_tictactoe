@@ -2,13 +2,15 @@
 # You can initilize it with an empty game
 # Instantiate this class to create an empty game state
 
-STRING_X = "X"
-STRING_O = "O"
-STRING_EMPTY = "_"
-STRING_DELIMITER = " "
-
-STRING_WINNER_DRAW = "DRAW"
-STRING_WINNER_NONE = "NOBODY WON"
+from config import (
+    PLAYER_X as STRING_X,
+    PLAYER_O as STRING_O,
+    EMPTY_CELL as STRING_EMPTY,
+    CELL_DELIMITER as STRING_DELIMITER,
+    GAME_WINNER_DRAW as STRING_WINNER_DRAW,
+    GAME_WINNER_NONE as STRING_WINNER_NONE,
+    TIC_TAC_TOE_SIZE,
+)
 
 
 class WrongMoveError(Exception):
@@ -19,7 +21,7 @@ class WrongMoveError(Exception):
 
 class TicTacToe:
     # init function that will create the following attributes.
-    def __init__(self, size=3):
+    def __init__(self, size=TIC_TAC_TOE_SIZE):
         # board size:
         self.size = size
         # board:

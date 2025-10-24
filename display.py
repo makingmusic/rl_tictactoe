@@ -6,7 +6,8 @@ Provides clean board display with in-place updates for reinforcement learning vi
 import os
 import sys
 import time
-from typing import Optional
+from typing import Optional, List
+from config import TIC_TAC_TOE_SIZE
 
 
 class GameDisplay:
@@ -89,6 +90,11 @@ class GameDisplay:
 
         self.first_display = False
 
+    @staticmethod
+    def board_to_string(board):
+        str1 = "\n" + "\n".join([" | ".join(row) for row in board]) + "\n"
+        return str1
+
     def display_game_summary(self, game, total_moves: int = None):
         # Game results:
         winner_string = (
@@ -100,3 +106,27 @@ class GameDisplay:
 
         print(f"\n {winner_string} wins in {total_moves} moves.")
         print("\n" + "=" * 30)
+
+
+def format_grid(values: List[float], title: str) -> List[str]:
+    """
+    Convert a list of values to a formatted grid display.
+
+    Args:
+        values: List of float values to display in grid format
+        title: Title to display above the grid
+
+    Returns:
+        List of strings representing the formatted grid
+    """
+    size = TIC_TAC_TOE_SIZE
+    # Calculate the width needed for the grid (3 numbers * 6 chars + 2 spaces)
+    grid_width = 3 * 6 + 2
+    # Center the title above the grid
+    centered_title = f"    {title:^{grid_width}}"
+    grid_lines = [centered_title]
+    for row_idx in range(size):
+        start = row_idx * size
+        row = values[start : start + size]
+        grid_lines.append("    " + " ".join(f"{v:>6.2f}" for v in row))
+    return grid_lines

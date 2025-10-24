@@ -5,17 +5,20 @@ import time as t
 from t3 import TicTacToe
 from display import GameDisplay
 from moves import TicTacToeMoves
+from config import DELAY_BETWEEN_MOVES, CLEAR_SCREEN, TIC_TAC_TOE_SIZE
 
 ########################################################
 # Initialize the game and display system
 ########################################################
 game = TicTacToe()
-display = GameDisplay(clear_screen=True, delay=0.1)  # 0.1 second delay between moves
+display = GameDisplay(clear_screen=CLEAR_SCREEN, delay=DELAY_BETWEEN_MOVES)
 
 ########################################################
 # Make moves and display each step
 ########################################################
-moves = TicTacToeMoves().generate_random_moves(max_moves=9)
+moves = TicTacToeMoves().generate_random_moves(
+    max_moves=TIC_TAC_TOE_SIZE * TIC_TAC_TOE_SIZE
+)
 
 move_count = 0
 for row, col, move_info in moves:
