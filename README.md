@@ -10,6 +10,7 @@ Learning to train a tic-tac-toe model through gameplay with clean visualization.
 * `display_config.py` - Configuration settings for different display modes
 * `main.py` - Updated to use the new display system
 * `example_usage.py` - Comprehensive examples of display system usage
+* `moves.py`: Defines move generators for test games (predefined and random), including scenarios for X win, O win, draw, and randomized move sequences.
 
 ### Quick Start
 ```bash
