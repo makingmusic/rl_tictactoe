@@ -2,7 +2,7 @@
 from itertools import product
 import random
 from display import GameDisplay, format_grid
-from config import TIC_TAC_TOE_SIZE
+from config import TIC_TAC_TOE_SIZE, GAME_WINNER_DRAW, PLAYER_X, PLAYER_O
 
 
 class TicTacToeModel:
@@ -11,6 +11,7 @@ class TicTacToeModel:
     CELL_COMBINATIONS = []
     stats = []
     totalCellsOnBoard = TIC_TAC_TOE_SIZE * TIC_TAC_TOE_SIZE
+    isRandomStats = False
 
     def __init__(self):
         self.id2board = []
@@ -21,44 +22,53 @@ class TicTacToeModel:
         self.init_stats()
 
     def init_stats(self):
-        ########################################################################
-        # random stats
-        ########################################################################
-        total_possible_boards = len(self.id2board)
-        use_random = True
-        if use_random:
-            # set the stats for the board id based on the random numbers
-            # IMPORTANT: Stats are now split by whose turn it is
-            self.stats = [
-                {
-                    "X": {  # Stats when it's X's turn to move
-                        "wins": [round(random.random(), 2) for _ in range(9)],
-                        "losses": [round(random.random(), 2) for _ in range(9)],
-                        "draws": [round(random.random(), 2) for _ in range(9)],
-                        "tries": [round(random.random(), 2) for _ in range(9)],
-                        "totals": {
-                            "wins_X": [round(random.random(), 2) for _ in range(9)],
-                            "wins_O": [round(random.random(), 2) for _ in range(9)],
-                            "draws": [round(random.random(), 2) for _ in range(9)],
-                        },
-                    },
-                    "O": {  # Stats when it's O's turn to move
-                        "wins": [round(random.random(), 2) for _ in range(9)],
-                        "losses": [round(random.random(), 2) for _ in range(9)],
-                        "draws": [round(random.random(), 2) for _ in range(9)],
-                        "tries": [round(random.random(), 2) for _ in range(9)],
-                        "totals": {
-                            "wins_X": [round(random.random(), 2) for _ in range(9)],
-                            "wins_O": [round(random.random(), 2) for _ in range(9)],
-                            "draws": [round(random.random(), 2) for _ in range(9)],
-                        },
-                    },
-                }
-                for _ in range(total_possible_boards)
-            ]
-            return
-        ########################################################################
+        if self.isRandomStats:
+            self.init_stats_random()
+        else:
+            self.init_stats_zero()
+        return
 
+    def init_stats_random(self):
+        """
+        Initialize stats with random values for all possible board states.
+        IMPORTANT: Stats are now split by whose turn it is
+        """
+        total_possible_boards = len(self.id2board)
+        # set the stats for the board id based on the random numbers
+        # IMPORTANT: Stats are now split by whose turn it is
+        self.stats = [
+            {
+                "X": {  # Stats when it's X's turn to move
+                    "wins": [round(random.random(), 2) for _ in range(9)],
+                    "losses": [round(random.random(), 2) for _ in range(9)],
+                    "draws": [round(random.random(), 2) for _ in range(9)],
+                    "tries": [round(random.random(), 2) for _ in range(9)],
+                    "totals": {
+                        "wins_X": [round(random.random(), 2) for _ in range(9)],
+                        "wins_O": [round(random.random(), 2) for _ in range(9)],
+                        "draws": [round(random.random(), 2) for _ in range(9)],
+                    },
+                },
+                "O": {  # Stats when it's O's turn to move
+                    "wins": [round(random.random(), 2) for _ in range(9)],
+                    "losses": [round(random.random(), 2) for _ in range(9)],
+                    "draws": [round(random.random(), 2) for _ in range(9)],
+                    "tries": [round(random.random(), 2) for _ in range(9)],
+                    "totals": {
+                        "wins_X": [round(random.random(), 2) for _ in range(9)],
+                        "wins_O": [round(random.random(), 2) for _ in range(9)],
+                        "draws": [round(random.random(), 2) for _ in range(9)],
+                    },
+                },
+            }
+            for _ in range(total_possible_boards)
+        ]
+
+    def init_stats_zero(self):
+        """
+        Initialize stats with zero values for all possible board states (as if no games have been played).
+        IMPORTANT: Stats are now split by whose turn it is
+        """
         # Initialize stats for all possible board states, not just the number of cells
         # IMPORTANT: Stats are now split by whose turn it is
         total_possible_boards = len(self.id2board)
@@ -103,6 +113,85 @@ class TicTacToeModel:
         if whose_turn not in ["X", "O"]:
             raise ValueError(f"whose_turn must be 'X' or 'O', got: {whose_turn}")
         return self.stats[board_id][whose_turn]
+
+    def getPrintableStatsForBoardIdForBothPlayers(self, board_id):
+        """
+        Get printable stats for a specific board state for both players.
+        Formats stats side by side to save space, with X stats on top and O stats below.
+        Each stat type (Wins, Losses, Draws, Tries) is displayed as a 3x3 grid.
+        """
+        stats_X = self.getStatsForBoardId(board_id, PLAYER_X)
+        stats_O = self.getStatsForBoardId(board_id, PLAYER_O)
+
+        size = TIC_TAC_TOE_SIZE
+
+        def format_stat_grid(stats_dict, label):
+            """Helper function to format a single stat type as a 3x3 grid."""
+            values_float = [v for v in stats_dict.get(label, [])]
+            values = [str(round(v, 2)) for v in values_float]
+            if len(values) < size * size:
+                values = list(values) + ["0"] * (size * size - len(values))
+            width = max(1, max((len(str(v)) for v in values), default=1))
+            rows = []
+            for row_idx in range(size):
+                start = row_idx * size
+                row = values[start : start + size]
+                rows.append(" ".join(str(v).rjust(width) for v in row))
+            return rows
+
+        # Format all stat types for both players
+        x_grids = {}
+        o_grids = {}
+        for label in ("wins", "losses", "draws", "tries"):
+            x_grids[label] = format_stat_grid(stats_X, label)
+            o_grids[label] = format_stat_grid(stats_O, label)
+
+        # Calculate column widths for alignment
+        label_widths = {}
+        for label in ("wins", "losses", "draws", "tries"):
+            # Find the maximum width needed for this stat type across both players
+            max_width = 0
+            for row in x_grids[label] + o_grids[label]:
+                max_width = max(max_width, len(row))
+            label_widths[label] = max_width
+
+        # Build the output string
+        lines = []
+
+        # X Player section - all stat types side by side
+        lines.append("X Player:")
+        # Header row with labels
+        header_parts = []
+        for label in ("wins", "losses", "draws", "tries"):
+            header_parts.append(f"{label.capitalize():<{label_widths[label]}}")
+        lines.append("  " + " | ".join(header_parts))
+
+        # Data rows for X
+        for row_idx in range(size):
+            row_parts = []
+            for label in ("wins", "losses", "draws", "tries"):
+                row_parts.append(f"{x_grids[label][row_idx]:<{label_widths[label]}}")
+            lines.append("  " + " | ".join(row_parts))
+
+        lines.append("")  # Empty line between X and O
+
+        # O Player section - all stat types side by side
+        lines.append("O Player:")
+        # Header row with labels
+        header_parts = []
+        for label in ("wins", "losses", "draws", "tries"):
+            header_parts.append(f"{label.capitalize():<{label_widths[label]}}")
+        lines.append("  " + " | ".join(header_parts))
+
+        # Data rows for O
+        for row_idx in range(size):
+            row_parts = []
+            for label in ("wins", "losses", "draws", "tries"):
+                row_parts.append(f"{o_grids[label][row_idx]:<{label_widths[label]}}")
+            lines.append("  " + " | ".join(row_parts))
+
+        return_string = "\n".join(lines)
+        return return_string
 
     def getPrintableStatsForBoardId(self, board_id, whose_turn):
         """
@@ -240,24 +329,20 @@ class TicTacToeModel:
             self.board2id[s] = len(self.id2board)
             self.id2board.append(s)
 
-    def setMoveStatsForBoardId(self, board_id, move, whose_turn, win, loss, draw):
+    def setMoveStatsForBoardId(self, board_id, move, whose_turn, who_won):
         """
         Set the stats for a specific move on a specific board and player turn.
-        This function is only useful for board states that are at the end of a game.
-        For reference,
-        Sample move_stats format:
-        {
-            "wins": 0.5,
-            "losses": 0.3,
-            "draws": 0.2,
-            "tries": 10,
-            "totals": {
-                "wins_X": 0.5,
-                "wins_O": 0.3,
-                "draws": 0.2,
-            },
-        }
-        Sample stats format:
+        This function is only useful for state updates for one board state.
+        A separate function should be used to update the stats for all board states. (using history)
+
+        The function determines win/loss/draw from the perspective of the player whose turn it is:
+        - If who_won == whose_turn: This move led to a win for the current player
+        - If who_won != whose_turn (and not a draw): This move led to a loss for the current player
+        - If who_won is GAME_WINNER_DRAW or None: This move led to a draw
+
+        Stats are only updated for the player making the move (whose_turn).
+
+        For reference, Sample stats format:
         stats[board_id] = {
             "X": {  # When it's X's turn
                 "wins": [0.5, 0.3, 0.2, ...],
@@ -286,46 +371,193 @@ class TicTacToeModel:
         Args:
             board_id: the id of the board
             move: the move to set the stats for
-            whose_turn: "X" or "O" - whose turn it is to move
-            win: the win value to set
-            loss: the loss value to set
-            draw: the draw value to set
+            whose_turn: "X" or "O" - whose turn it is to move (the player making this move)
+            who_won: the winner of the game (PLAYER_X, PLAYER_O, or GAME_WINNER_DRAW/None for draw)
         """
-        # TODO: Implement this function when needed for training
+        # Validate whose_turn parameter
+        if whose_turn not in [PLAYER_X, PLAYER_O]:
+            raise ValueError(
+                f"Invalid whose_turn value: {whose_turn}. Expected PLAYER_X or PLAYER_O"
+            )
+
+        # Validate who_won parameter
+        if who_won not in [PLAYER_X, PLAYER_O, GAME_WINNER_DRAW, None]:
+            raise ValueError(
+                f"Invalid who_won value: {who_won}. Expected PLAYER_X, PLAYER_O, GAME_WINNER_DRAW, or None"
+            )
+
+        # Determine win/loss/draw from the perspective of whose_turn
+        # explanation:
+        # - is_draw: the game ended in a draw
+        # - is_win_for_whose_turn: the game ended in a win for whose_turn (whose_turn won)
+        # - is_loss_for_whose_turn: the game ended in a loss for whose_turn (whose_turn lost)
+        is_draw = who_won == GAME_WINNER_DRAW or who_won is None
+        is_win_for_whose_turn = not is_draw and who_won == whose_turn
+        is_loss_for_whose_turn = not is_draw and who_won != whose_turn
+
+        # getStatsForBoardId returns stats[board_id][whose_turn]
+        stats_to_update = self.getStatsForBoardId(board_id, whose_turn)
+
+        # Always increment tries for this move
+        stats_to_update["tries"][move] += 1
+
+        if is_win_for_whose_turn:
+            # This move by whose_turn led to a win for whose_turn
+            stats_to_update["wins"][move] += 1
+            if whose_turn == PLAYER_X:
+                stats_to_update["totals"]["wins_X"][move] += 1
+            else:  # whose_turn == PLAYER_O
+                stats_to_update["totals"]["wins_O"][move] += 1
+
+        elif is_loss_for_whose_turn:
+            # This move by whose_turn led to a loss for whose_turn (opponent won)
+            stats_to_update["losses"][move] += 1
+            if whose_turn == PLAYER_X:
+                # X lost, so O won
+                stats_to_update["totals"]["wins_O"][move] += 1
+            else:  # whose_turn == PLAYER_O
+                # O lost, so X won
+                stats_to_update["totals"]["wins_X"][move] += 1
+
+        elif is_draw:
+            # This move led to a draw
+            stats_to_update["draws"][move] += 1
+            stats_to_update["totals"]["draws"][move] += 1
+
+        self.stats[board_id][whose_turn] = stats_to_update
+        return
+
+    def setMoveStatsForEntireGameFromHistory(self, history, who_won):
+        """
+        Set the stats for an entire game.
+        * history will contain a list containing tuples of
+        ** board_id (board state)
+        ** move (the move made - index of the move)
+        ** who_moved (the player who made the move)
+        * who_won (the player who won the game) : separate variable.
+          Can be PLAYER_X, PLAYER_O, or GAME_WINNER_DRAW/None for a draw.
+
+        Sample history format:
+        [
+            (board_id, move, who_moved),
+            (board_id, move, who_moved),
+            ...
+        ]
+
+        Example history:
+        [
+            (2180, 0, "X"), (2180, 1, "O"), (2180, 2, "X"),
+            (2180, 3, "O"), (2180, 4, "X"), (2180, 5, "O"),
+            (2180, 6, "X"), (2180, 7, "O"), (2180, 8, "X"),
+            ...
+        ]
+
+        Args:
+            history: a list of moves (follows the structure described above)
+            who_won: the winner of the game (PLAYER_X, PLAYER_O, or GAME_WINNER_DRAW/None for draw)
+        """
+        # Handle empty history
+        if not history:
+            return  # Empty history, nothing to update
+
+        # verify that who_won is a valid value
+        if who_won not in [PLAYER_X, PLAYER_O, GAME_WINNER_DRAW, None]:
+            raise ValueError(
+                f"Invalid who_won value: {who_won}. Expected PLAYER_X, PLAYER_O, GAME_WINNER_DRAW, or None"
+            )
+
+        # Cycle through history and update stats for each move
+        for board_id, move, who_moved in history:
+            self.setMoveStatsForBoardId(board_id, move, who_moved, who_won)
         return
 
 
-if __name__ == "__main__":
+# move all test functionality in to a separate function.
+# need not be part of the class.
+def test_TicTacToeModel():
     model = TicTacToeModel()
-    # pick a random number from 0 to maximum possible board string index
-    random_board_id = random.randint(0, len(model.id2board) - 1)
 
-    # Get the board string to determine whose turn it is
-    board_string = model.id2board[random_board_id]
-    # Count X's and O's to determine whose turn it is
-    x_count = board_string.count("X")
-    o_count = board_string.count("O")
-    # If X and O counts are equal, it's X's turn (X goes first)
-    # If X count is one more than O count, it's O's turn
-    whose_turn = "X" if x_count == o_count else "O"
+    # Tesitng if board move stats update properly
+    # Create a test history and set the stats for the entire game using the history
+    # start with a blank board
+    test_board_string_0 = "_________"
+    test_board_string_1 = "X________"
+    test_board_string_2 = "XO_______"
+    test_board_string_3 = "XO_X_____"
+    test_board_string_4 = "XO_XO____"
+    test_board_string_5 = "XO_XO_X__"
 
-    print("picked a random board id: ", random_board_id)
-    print(f"Board string: {board_string}")
-    print(f"Whose turn: {whose_turn} (X count: {x_count}, O count: {o_count})")
+    test_board_id_0 = model.board2id[test_board_string_0]
+    test_board_id_1 = model.board2id[test_board_string_1]
+    test_board_id_2 = model.board2id[test_board_string_2]
+    test_board_id_3 = model.board2id[test_board_string_3]
+    test_board_id_4 = model.board2id[test_board_string_4]
+    test_board_id_5 = model.board2id[test_board_string_5]  # X wins here.
 
-    print("\nprintable board:")
-    printable = model.getPrintableBoardFromId(random_board_id)
-    print(printable)
+    test_history = []
+    test_history = [
+        (test_board_id_0, 0, PLAYER_X),
+        (test_board_id_1, 1, PLAYER_O),
+        (test_board_id_2, 3, PLAYER_X),
+        (test_board_id_3, 4, PLAYER_O),
+        (test_board_id_4, 6, PLAYER_X),
+    ]
 
-    print("\nprintable board stats:")
-    printable_board_stats = model.getPrintableStatsForBoardId(
-        random_board_id, whose_turn
-    )
-    print(printable_board_stats)
+    # for each board in the history, print the stats for the board
+    print("--------------------------------")
+    print("Printing stats for each board in the history")
+    print("--------------------------------")
+    for board_id, move, who_moved in test_history:
+        print(f"Board {board_id} with {move} by {who_moved} and all stats")
+        print(model.getPrintableBoardFromId(board_id))
+        print(model.getPrintableStatsForBoardIdForBothPlayers(board_id))
+        print("--------------------------------")
 
-    print("\nrandom board move stats:")
-    random_move = random.randint(0, model.totalCellsOnBoard - 1)
-    stats_for_board_move = model.getPrintableStatsForBoardMove(
-        random_board_id, random_move, whose_turn
-    )
-    print(stats_for_board_move)
+    print("--------------------------------")
+    print("Testing One Shot update based on history list")
+    print("--------------------------------")
+    # now do the same thing in one shot using the history function.
+    # first print the board_id_0 stats before
+    print("BEFORE STATS FOR ALL BOARDS")
+    print(model.getPrintableBoardFromId(test_board_id_0))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_0))
+    print("----")
+    print(model.getPrintableBoardFromId(test_board_id_1))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_1))
+    print("----")
+    print(model.getPrintableBoardFromId(test_board_id_2))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_2))
+    print("----")
+    print(model.getPrintableBoardFromId(test_board_id_3))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_3))
+    print("----")
+    print(model.getPrintableBoardFromId(test_board_id_4))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_4))
+
+    # update stats using history function
+    print("--------------------------------")
+    print("NOW UPDATING STATS FOR ALL BOARDS")
+    print("--------------------------------")
+
+    model.setMoveStatsForEntireGameFromHistory(test_history, PLAYER_X)
+
+    # print after stats
+    print("AFTER STATS FOR ALL BOARDS")
+    print(model.getPrintableBoardFromId(test_board_id_0))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_0))
+    print("----")
+    print(model.getPrintableBoardFromId(test_board_id_1))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_1))
+    print("----")
+    print(model.getPrintableBoardFromId(test_board_id_2))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_2))
+    print("----")
+    print(model.getPrintableBoardFromId(test_board_id_3))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_3))
+    print("----")
+    print(model.getPrintableBoardFromId(test_board_id_4))
+    print(model.getPrintableStatsForBoardIdForBothPlayers(test_board_id_4))
+
+
+if __name__ == "__main__":
+    test_TicTacToeModel()
